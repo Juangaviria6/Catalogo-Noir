@@ -1,6 +1,7 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { motion } from 'framer-motion'
 import { Instagram, MessageCircle, Send, MapPin, Check } from 'lucide-react'
+import { WHATSAPP_PHONE, generateContactWhatsAppLink } from '@/utils'
 import Container from '@/components/ui/Container'
 import Button from '@/components/ui/Button'
 
@@ -17,7 +18,7 @@ const socialLinks = [
     platform: 'WhatsApp',
     handle: '+57 319 787 2281',
     description: 'Escríbenos directamente para pedidos y consultas personalizadas.',
-    href: 'https://wa.me/573197872281',
+    href: `https://wa.me/${WHATSAPP_PHONE}`,
     icon: MessageCircle,
     color: 'from-green-600 to-green-400',
   },
@@ -26,18 +27,14 @@ const socialLinks = [
 const ContactPage = () => {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [sent, setSent] = useState(false)
-  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     document.title = 'Contacto | Noir Store'
   }, [])
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    // Simulate send — integrate with your backend/EmailJS/Formspree here
-    await new Promise(r => setTimeout(r, 1200))
-    setLoading(false)
+    window.open(generateContactWhatsAppLink(form.name, form.email, form.message), '_blank')
     setSent(true)
   }
 
@@ -153,10 +150,11 @@ const ContactPage = () => {
                   <Check size={20} className="text-white" />
                 </div>
                 <p className="font-heading font-bold text-white text-lg tracking-tight mb-2">
-                  Mensaje enviado
+                  Te llevamos a WhatsApp
                 </p>
                 <p className="font-body text-white/40 text-sm max-w-xs">
-                  Gracias por contactarnos. Te respondemos pronto por email o WhatsApp.
+                  Abrimos WhatsApp con tu mensaje listo para enviar. Si no se abrió, revisa que tu
+                  navegador no haya bloqueado la ventana emergente.
                 </p>
               </motion.div>
             ) : (
@@ -202,9 +200,9 @@ const ContactPage = () => {
                     className="w-full bg-noir-dark border border-white/10 text-white placeholder-white/15 px-4 py-3 text-sm font-body focus:outline-none focus:border-white/30 transition-colors resize-none"
                   />
                 </div>
-                <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>
+                <Button type="submit" variant="primary" size="lg" fullWidth>
                   <Send size={14} className="mr-2" />
-                  Enviar mensaje
+                  Enviar por WhatsApp
                 </Button>
               </form>
             )}

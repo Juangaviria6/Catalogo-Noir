@@ -33,6 +33,17 @@ export const generateCartWhatsAppLink = (items: CartItem[], total: number): stri
   return `https://wa.me/${WHATSAPP_PHONE}?text=${message}`
 }
 
+export const generateContactWhatsAppLink = (
+  name: string,
+  email: string,
+  message: string
+): string => {
+  const text = encodeURIComponent(
+    `Hola! Mi nombre es *${name}* (${email}).\n\n${message}`
+  )
+  return `https://wa.me/${WHATSAPP_PHONE}?text=${text}`
+}
+
 export const slugify = (text: string): string =>
   text
     .toLowerCase()

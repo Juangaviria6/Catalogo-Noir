@@ -20,4 +20,7 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    allowedHosts: ['catalogo-noir.onrender.com'],
+  },
 })

@@ -224,7 +224,7 @@ const ProductPage = () => {
               {formatPrice(product.price)}
             </p>
 
-            <p className="font-body text-white/50 text-sm leading-relaxed mb-8 border-t border-b border-white/10 py-6">
+            <p className="font-body text-white/50 text-sm leading-relaxed mb-8 border-t border-b border-white/10 py-6 whitespace-pre-line">
               {product.description}
             </p>
 

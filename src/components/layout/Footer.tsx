@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Instagram, MessageCircle, MapPin, ArrowUpRight } from 'lucide-react'
+import { WHATSAPP_PHONE } from '@/utils'
 import NoirLogo from '@/components/ui/NoirLogo'
 
 const Footer = () => {
@@ -77,7 +78,7 @@ const Footer = () => {
               </a>
 
               <a
-                href="https://wa.me/573197872281"
+                href={`https://wa.me/${WHATSAPP_PHONE}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-between group text-white/50 hover:text-white transition-colors py-2 border-b border-white/5"

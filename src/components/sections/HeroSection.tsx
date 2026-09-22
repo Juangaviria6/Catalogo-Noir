@@ -136,14 +136,14 @@ const HeroSection = () => {
         style={{ opacity }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-30"
       >
-        <span className="font-heading text-[9px] tracking-[0.35em] text-white/40 uppercase">
+        <span className="font-heading text-[9px] tracking-[0.35em] text-white/70 uppercase drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
           Scroll
         </span>
         <motion.div
           animate={{ y: [0, 6, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <ArrowDown size={14} className="text-white/40" />
+          <ArrowDown size={14} className="text-white/70 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]" />
         </motion.div>
       </motion.div>
     </section>

@@ -115,7 +115,7 @@ const Navbar = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-black/98 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-40 bg-black backdrop-blur-sm md:hidden"
           >
             <div className="flex flex-col h-full px-8 pt-20 pb-12">
               {/* Logo en menú móvil */}
@@ -139,7 +139,7 @@ const Navbar = () => {
                       className={({ isActive }) =>
                         clsx(
                           'block font-heading font-black text-4xl tracking-tight py-3 border-b border-white/10 transition-colors',
-                          isActive ? 'text-white' : 'text-white/30 hover:text-white'
+                          isActive ? 'text-white' : 'text-white/55 hover:text-white'
                         )
                       }
                     >

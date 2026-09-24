@@ -5,7 +5,7 @@ import { ArrowLeft, MessageCircle, ChevronLeft, ChevronRight, Share2, ShoppingBa
 import { useProduct } from '@/hooks/useProduct'
 import { formatPrice, generateWhatsAppLink } from '@/utils'
 import { useCart } from '@/context/CartContext'
-import { ProductSize } from '@/types'
+import { ProductColor, ProductSize } from '@/types'
 import Container from '@/components/ui/Container'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
@@ -17,6 +17,7 @@ const ProductPage = () => {
   const { addItem } = useCart()
 
   const [selectedSize, setSelectedSize] = useState<ProductSize | null>(null)
+  const [selectedColor, setSelectedColor] = useState<ProductColor | null>(null)
   const [currentImage, setCurrentImage] = useState(0)
   const [sizeError, setSizeError] = useState(false)
   const [justAdded, setJustAdded] = useState(false)
@@ -31,8 +32,14 @@ const ProductPage = () => {
       setCurrentImage(0)
       setSelectedSize(null)
       setSizeError(false)
+      setSelectedColor(product.colors && product.colors.length > 0 ? product.colors[0] : null)
     }
   }, [product])
+
+  const selectColor = (color: ProductColor) => {
+    setSelectedColor(color)
+    setCurrentImage(0)
+  }
 
   const requireSize = (): ProductSize | null => {
     if (!product) return null
@@ -48,14 +55,14 @@ const ProductPage = () => {
     if (!product) return
     const size = requireSize()
     if (!size) return
-    window.open(generateWhatsAppLink(product.name, product.price, size), '_blank')
+    window.open(generateWhatsAppLink(product.name, product.price, size, selectedColor?.name), '_blank')
   }
 
   const handleAddToCart = () => {
     if (!product) return
     const size = requireSize()
     if (!size) return
-    addItem(product, size)
+    addItem(product, size, 1, selectedColor?.name)
     setJustAdded(true)
     setTimeout(() => setJustAdded(false), 1500)
   }
@@ -103,8 +110,11 @@ const ProductPage = () => {
 
   if (!product) return null
 
-  const prevImage = () => setCurrentImage(i => (i === 0 ? product.images.length - 1 : i - 1))
-  const nextImage = () => setCurrentImage(i => (i === product.images.length - 1 ? 0 : i + 1))
+  const galleryImages =
+    selectedColor && selectedColor.images.length > 0 ? selectedColor.images : product.images
+
+  const prevImage = () => setCurrentImage(i => (i === 0 ? galleryImages.length - 1 : i - 1))
+  const nextImage = () => setCurrentImage(i => (i === galleryImages.length - 1 ? 0 : i + 1))
 
   return (
     <div className="min-h-screen bg-black pt-20">
@@ -138,7 +148,7 @@ const ProductPage = () => {
               <AnimatePresence mode="wait">
                 <motion.img
                   key={currentImage}
-                  src={product.images[currentImage]}
+                  src={galleryImages[currentImage]}
                   alt={`${product.name} — vista ${currentImage + 1}`}
                   initial={{ opacity: 0, scale: 1.03 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -154,7 +164,7 @@ const ProductPage = () => {
                 </div>
               )}
 
-              {product.images.length > 1 && (
+              {galleryImages.length > 1 && (
                 <>
                   <button
                     onClick={prevImage}
@@ -171,9 +181,9 @@ const ProductPage = () => {
                 </>
               )}
 
-              {product.images.length > 1 && (
+              {galleryImages.length > 1 && (
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-                  {product.images.map((_, i) => (
+                  {galleryImages.map((_, i) => (
                     <button
                       key={i}
                       onClick={() => setCurrentImage(i)}
@@ -187,9 +197,9 @@ const ProductPage = () => {
               )}
             </div>
 
-            {product.images.length > 1 && (
+            {galleryImages.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
-                {product.images.map((img, i) => (
+                {galleryImages.map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrentImage(i)}
@@ -227,6 +237,37 @@ const ProductPage = () => {
             <p className="font-body text-white/50 text-sm leading-relaxed mb-8 border-t border-b border-white/10 py-6 whitespace-pre-line">
               {product.description}
             </p>
+
+            {/* Colores */}
+            {product.colors && product.colors.length > 0 && (
+              <div className="mb-8">
+                <p className="font-heading text-[10px] tracking-[0.25em] text-white/40 uppercase mb-3">
+                  Color{selectedColor && <span className="text-white ml-2">— {selectedColor.name}</span>}
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {product.colors.map(color => (
+                    <button
+                      key={color.name}
+                      type="button"
+                      onClick={() => selectColor(color)}
+                      title={color.name}
+                      aria-label={color.name}
+                      className={[
+                        'w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center shrink-0',
+                        selectedColor?.name === color.name
+                          ? 'border-white scale-110'
+                          : 'border-white/15 hover:border-white/40',
+                      ].join(' ')}
+                    >
+                      <span
+                        className="w-7 h-7 rounded-full border border-white/20"
+                        style={{ backgroundColor: color.hex }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Tallas */}
             <div className="mb-8">

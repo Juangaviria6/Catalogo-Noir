@@ -8,9 +8,9 @@ interface CartContextValue {
   isOpen: boolean
   openCart: () => void
   closeCart: () => void
-  addItem: (product: Product, size: ProductSize, quantity?: number) => void
-  removeItem: (productId: string, size: ProductSize) => void
-  updateQuantity: (productId: string, size: ProductSize, quantity: number) => void
+  addItem: (product: Product, size: ProductSize, quantity?: number, color?: string) => void
+  removeItem: (productId: string, size: ProductSize, color?: string) => void
+  updateQuantity: (productId: string, size: ProductSize, quantity: number, color?: string) => void
   clearCart: () => void
   totalItems: number
   totalPrice: number
@@ -39,32 +39,34 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [items])
 
-  const addItem = (product: Product, size: ProductSize, quantity = 1) => {
+  const addItem = (product: Product, size: ProductSize, quantity = 1, color?: string) => {
     setItems(prev => {
-      const existing = prev.find(i => i.product.id === product.id && i.size === size)
+      const existing = prev.find(i => i.product.id === product.id && i.size === size && i.color === color)
       if (existing) {
         return prev.map(i =>
-          i.product.id === product.id && i.size === size
+          i.product.id === product.id && i.size === size && i.color === color
             ? { ...i, quantity: i.quantity + quantity }
             : i
         )
       }
-      return [...prev, { product, size, quantity }]
+      return [...prev, { product, size, quantity, color }]
     })
     setIsOpen(true)
   }
 
-  const removeItem = (productId: string, size: ProductSize) => {
-    setItems(prev => prev.filter(i => !(i.product.id === productId && i.size === size)))
+  const removeItem = (productId: string, size: ProductSize, color?: string) => {
+    setItems(prev => prev.filter(i => !(i.product.id === productId && i.size === size && i.color === color)))
   }
 
-  const updateQuantity = (productId: string, size: ProductSize, quantity: number) => {
+  const updateQuantity = (productId: string, size: ProductSize, quantity: number, color?: string) => {
     if (quantity < 1) {
-      removeItem(productId, size)
+      removeItem(productId, size, color)
       return
     }
     setItems(prev =>
-      prev.map(i => (i.product.id === productId && i.size === size ? { ...i, quantity } : i))
+      prev.map(i =>
+        i.product.id === productId && i.size === size && i.color === color ? { ...i, quantity } : i
+      )
     )
   }
 

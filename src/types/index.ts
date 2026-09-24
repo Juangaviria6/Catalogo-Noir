@@ -1,6 +1,12 @@
-export type ProductCategory = 'gorras' | 'conjuntos' | 'camisas' | 'jeans'
+export type ProductCategory = 'gorras' | 'buzos' | 'camisas' | 'jeans'
 
 export type ProductSize = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL' | 'ÚNICA' | '30' | '32' | '34' | '36'
+
+export interface ProductColor {
+  name: string
+  hex: string
+  images: string[]
+}
 
 export interface Product {
   id: string
@@ -14,6 +20,7 @@ export interface Product {
   badge?: string
   sku?: string
   brand?: string
+  colors?: ProductColor[]
 }
 
 export interface Category {
@@ -27,6 +34,7 @@ export interface Category {
 export interface CartItem {
   product: Product
   size: ProductSize
+  color?: string
   quantity: number
 }
 

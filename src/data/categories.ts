@@ -9,9 +9,9 @@ export const fallbackCategories: Category[] = [
     count: 0,
   },
   {
-    id: 'conjuntos',
-    name: 'Conjuntos',
-    description: 'Sets y streetwear de alto impacto',
+    id: 'buzos',
+    name: 'Buzos',
+    description: 'Buzos y hoodies streetwear de alto impacto',
     image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80',
     count: 0,
   },

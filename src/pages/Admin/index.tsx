@@ -6,7 +6,7 @@ import { categoriesService } from '@/services/categories'
 import { useCategories } from '@/hooks/useCategories'
 import { getBrandsForCategory } from '@/data/brands'
 import { getSizesForCategory } from '@/data/sizes'
-import { Product, ProductCategory, ProductSize } from '@/types'
+import { Product, ProductCategory, ProductColor, ProductSize } from '@/types'
 import { formatPrice } from '@/utils'
 import CloudinaryUpload from '@/components/ui/CloudinaryUpload'
 import Button from '@/components/ui/Button'
@@ -23,6 +23,7 @@ type FormData = {
   sku: string
   brand: string
   images: string[]
+  colors: ProductColor[]
 }
 
 const EMPTY_FORM: FormData = {
@@ -36,11 +37,12 @@ const EMPTY_FORM: FormData = {
   sku: '',
   brand: '',
   images: [],
+  colors: [],
 }
 
 const CATEGORIES: { value: ProductCategory; label: string }[] = [
   { value: 'gorras', label: 'Gorras' },
-  { value: 'conjuntos', label: 'Conjuntos' },
+  { value: 'buzos', label: 'Buzos' },
   { value: 'camisas', label: 'Camisas' },
   { value: 'jeans', label: 'Jeans' },
 ]
@@ -111,6 +113,7 @@ const AdminPage = () => {
       sku: product.sku ?? '',
       brand: product.brand ?? '',
       images: [...product.images],
+      colors: product.colors ? product.colors.map(c => ({ ...c, images: [...c.images] })) : [],
     })
     setError(null)
     setPanelOpen(true)
@@ -127,6 +130,21 @@ const AdminPage = () => {
       ...f,
       sizes: f.sizes.includes(size) ? f.sizes.filter(s => s !== size) : [...f.sizes, size],
     }))
+  }
+
+  const addColor = () => {
+    setForm(f => ({ ...f, colors: [...f.colors, { name: '', hex: '#1a1a1a', images: [] }] }))
+  }
+
+  const updateColor = (index: number, patch: Partial<ProductColor>) => {
+    setForm(f => ({
+      ...f,
+      colors: f.colors.map((c, i) => (i === index ? { ...c, ...patch } : c)),
+    }))
+  }
+
+  const removeColor = (index: number) => {
+    setForm(f => ({ ...f, colors: f.colors.filter((_, i) => i !== index) }))
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -151,6 +169,9 @@ const AdminPage = () => {
       sku: form.sku.trim() || undefined,
       brand: form.brand.trim() || undefined,
       images: form.images,
+      colors: form.colors
+        .filter(c => c.name.trim())
+        .map(c => ({ name: c.name.trim(), hex: c.hex, images: c.images })),
     }
 
     try {
@@ -640,6 +661,72 @@ const AdminPage = () => {
                     ))}
                   </div>
                 </div>
+
+                {/* Colores */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block font-heading text-[10px] tracking-widest text-white/40 uppercase">
+                      Colores
+                      <span className="ml-1 text-white/20 normal-case tracking-normal">(opcional, tú los defines)</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={addColor}
+                      className="flex items-center gap-1 font-heading text-[10px] tracking-widest uppercase text-white/50 hover:text-white transition-colors"
+                    >
+                      <Plus size={11} />
+                      Agregar color
+                    </button>
+                  </div>
+
+                  {form.colors.length === 0 ? (
+                    <p className="font-body text-xs text-white/20">
+                      Sin variantes de color — el producto usará las imágenes generales de arriba.
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {form.colors.map((color, i) => (
+                        <div key={i} className="border border-white/10 bg-black/30 p-3 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={color.hex}
+                              onChange={e => updateColor(i, { hex: e.target.value })}
+                              title="Elegir tono"
+                              className="w-9 h-9 shrink-0 bg-transparent border border-white/10 cursor-pointer p-0.5"
+                            />
+                            <input
+                              value={color.name}
+                              onChange={e => updateColor(i, { name: e.target.value })}
+                              placeholder="Nombre del color (ej: Azul petróleo)"
+                              className="flex-1 bg-noir-mid border border-white/10 text-white placeholder-white/15 px-3 py-2 text-xs font-body focus:outline-none focus:border-white/30 transition-colors"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeColor(i)}
+                              title="Quitar color"
+                              className="w-8 h-8 shrink-0 border border-white/10 text-white/40 hover:text-red-400 hover:border-red-400/30 flex items-center justify-center transition-colors"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+
+                          <div>
+                            <p className="font-heading text-[9px] tracking-widest text-white/30 uppercase mb-2">
+                              Imágenes para este color
+                            </p>
+                            <CloudinaryUpload
+                              value={color.images}
+                              onChange={imgs => updateColor(i, { images: imgs })}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-white/10" />
 
                 {/* Badge + SKU */}
                 <div className="grid grid-cols-2 gap-3">

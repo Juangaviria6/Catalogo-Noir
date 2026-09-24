@@ -51,12 +51,15 @@ const CartDrawer = () => {
               </div>
             ) : (
               <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-                {items.map(item => (
-                  <div key={`${item.product.id}-${item.size}`} className="flex gap-4">
+                {items.map(item => {
+                  const colorData = item.product.colors?.find(c => c.name === item.color)
+                  const thumb = colorData?.images[0] || item.product.images[0]
+                  return (
+                  <div key={`${item.product.id}-${item.size}-${item.color ?? ''}`} className="flex gap-4">
                     <div className="w-20 h-24 shrink-0 overflow-hidden bg-noir-mid">
-                      {item.product.images[0] && (
+                      {thumb && (
                         <img
-                          src={item.product.images[0]}
+                          src={thumb}
                           alt={item.product.name}
                           className="w-full h-full object-cover"
                         />
@@ -68,8 +71,19 @@ const CartDrawer = () => {
                         <p className="font-heading font-bold text-white text-sm leading-tight truncate">
                           {item.product.name}
                         </p>
-                        <p className="font-heading text-[10px] tracking-wide text-white/30 uppercase mt-0.5">
+                        <p className="font-heading text-[10px] tracking-wide text-white/30 uppercase mt-0.5 flex items-center gap-1.5">
                           Talla {item.size}
+                          {item.color && (
+                            <span className="flex items-center gap-1">
+                              · {item.color}
+                              {colorData && (
+                                <span
+                                  className="w-2.5 h-2.5 rounded-full border border-white/20 inline-block"
+                                  style={{ backgroundColor: colorData.hex }}
+                                />
+                              )}
+                            </span>
+                          )}
                         </p>
                         <p className="font-body font-semibold text-white text-sm mt-1">
                           {formatPrice(item.product.price)}
@@ -79,7 +93,7 @@ const CartDrawer = () => {
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center border border-white/10">
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.size, item.quantity - 1)}
+                            onClick={() => updateQuantity(item.product.id, item.size, item.quantity - 1, item.color)}
                             className="w-7 h-7 flex items-center justify-center text-white/50 hover:text-white transition-colors"
                           >
                             <Minus size={11} />
@@ -88,7 +102,7 @@ const CartDrawer = () => {
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.size, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.product.id, item.size, item.quantity + 1, item.color)}
                             className="w-7 h-7 flex items-center justify-center text-white/50 hover:text-white transition-colors"
                           >
                             <Plus size={11} />
@@ -96,7 +110,7 @@ const CartDrawer = () => {
                         </div>
 
                         <button
-                          onClick={() => removeItem(item.product.id, item.size)}
+                          onClick={() => removeItem(item.product.id, item.size, item.color)}
                           className="text-white/30 hover:text-red-400 transition-colors"
                         >
                           <Trash2 size={14} />
@@ -104,7 +118,8 @@ const CartDrawer = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             )}
 

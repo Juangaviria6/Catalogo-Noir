@@ -14,19 +14,22 @@ export const formatPrice = (price: number): string => {
 export const generateWhatsAppLink = (
   productName: string,
   productPrice: number,
-  selectedSize?: string
+  selectedSize?: string,
+  selectedColor?: string
 ): string => {
   const sizeText = selectedSize ? ` - Talla: ${selectedSize}` : ''
+  const colorText = selectedColor ? ` - Color: ${selectedColor}` : ''
   const message = encodeURIComponent(
-    `Hola! Me interesa el producto: *${productName}*${sizeText}\nPrecio: ${formatPrice(productPrice)}\n\n¿Está disponible?`
+    `Hola! Me interesa el producto: *${productName}*${sizeText}${colorText}\nPrecio: ${formatPrice(productPrice)}\n\n¿Está disponible?`
   )
   return `https://wa.me/${WHATSAPP_PHONE}?text=${message}`
 }
 
 export const generateCartWhatsAppLink = (items: CartItem[], total: number): string => {
-  const lines = items.map(item =>
-    `• *${item.product.name}* (Talla ${item.size}) x${item.quantity} — ${formatPrice(item.product.price * item.quantity)}`
-  )
+  const lines = items.map(item => {
+    const colorText = item.color ? `, Color ${item.color}` : ''
+    return `• *${item.product.name}* (Talla ${item.size}${colorText}) x${item.quantity} — ${formatPrice(item.product.price * item.quantity)}`
+  })
   const message = encodeURIComponent(
     `Hola! Quiero hacer este pedido:\n\n${lines.join('\n')}\n\nTotal: ${formatPrice(total)}\n\n¿Está disponible?`
   )
@@ -57,7 +60,7 @@ export const clsx = (...classes: (string | undefined | null | false)[]): string 
 
 export const categoryLabels: Record<string, string> = {
   gorras: 'Gorras',
-  conjuntos: 'Conjuntos',
+  buzos: 'Buzos',
   camisas: 'Camisas',
   jeans: 'Jeans',
   all: 'Todos',

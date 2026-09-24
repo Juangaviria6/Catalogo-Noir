@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import { Product, ProductCategory } from '@/types'
+import { Product, ProductCategory, ProductColor } from '@/types'
 import { slugify } from '@/utils'
 
 type Row = {
@@ -14,6 +14,7 @@ type Row = {
   badge: string | null
   sku: string | null
   brand: string | null
+  colors: ProductColor[] | null
 }
 
 const toProduct = (row: Row): Product => ({
@@ -28,6 +29,7 @@ const toProduct = (row: Row): Product => ({
   badge: row.badge ?? undefined,
   sku: row.sku ?? undefined,
   brand: row.brand ?? undefined,
+  colors: row.colors && row.colors.length > 0 ? row.colors : undefined,
 })
 
 export const productsService = {
@@ -94,6 +96,7 @@ export const productsService = {
         badge: input.badge ?? null,
         sku: input.sku ?? null,
         brand: input.brand ?? null,
+        colors: input.colors ?? [],
       })
       .select()
       .single()
@@ -116,6 +119,7 @@ export const productsService = {
         ...('badge' in input ? { badge: input.badge ?? null } : {}),
         ...('sku' in input ? { sku: input.sku ?? null } : {}),
         ...('brand' in input ? { brand: input.brand ?? null } : {}),
+        ...('colors' in input ? { colors: input.colors ?? [] } : {}),
       })
       .eq('id', id)
       .select()

@@ -41,7 +41,7 @@ const Footer = () => {
                 { label: 'Inicio', to: '/' },
                 { label: 'Catálogo', to: '/catalogo' },
                 { label: 'Gorras', to: '/catalogo?categoria=gorras' },
-                { label: 'Conjuntos', to: '/catalogo?categoria=conjuntos' },
+                { label: 'Buzos', to: '/catalogo?categoria=buzos' },
                 { label: 'Camisas', to: '/catalogo?categoria=camisas' },
                 { label: 'Jeans', to: '/catalogo?categoria=jeans' },
                 { label: 'Contacto', to: '/contacto' },

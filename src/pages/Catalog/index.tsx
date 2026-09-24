@@ -16,7 +16,7 @@ import { useState } from 'react'
 const CATEGORIES: Array<{ value: ProductCategory | 'all'; label: string }> = [
   { value: 'all', label: 'Todos' },
   { value: 'gorras', label: 'Gorras' },
-  { value: 'conjuntos', label: 'Conjuntos' },
+  { value: 'buzos', label: 'Buzos' },
   { value: 'camisas', label: 'Camisas' },
   { value: 'jeans', label: 'Jeans' },
 ]

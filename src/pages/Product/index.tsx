@@ -38,17 +38,19 @@ const ProductPage = () => {
 
   const selectColor = (color: ProductColor) => {
     setSelectedColor(color)
+    setSelectedSize(null)
+    setSizeError(false)
     setCurrentImage(0)
   }
 
   const requireSize = (): ProductSize | null => {
     if (!product) return null
-    if (product.sizes.length > 1 && !selectedSize) {
+    if (availableSizes.length > 1 && !selectedSize) {
       setSizeError(true)
       setTimeout(() => setSizeError(false), 2500)
       return null
     }
-    return selectedSize ?? product.sizes[0] ?? null
+    return selectedSize ?? availableSizes[0] ?? null
   }
 
   const handleWhatsApp = () => {
@@ -110,6 +112,7 @@ const ProductPage = () => {
 
   if (!product) return null
 
+  const availableSizes = selectedColor?.sizes ?? product.sizes
   const galleryImages =
     selectedColor && selectedColor.images.length > 0 ? selectedColor.images : product.images
 
@@ -277,7 +280,7 @@ const ProductPage = () => {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {product.sizes.map(size => (
+                {availableSizes.map(size => (
                   <button
                     key={size}
                     onClick={() => { setSelectedSize(size); setSizeError(false) }}

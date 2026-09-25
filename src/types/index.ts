@@ -6,6 +6,7 @@ export interface ProductColor {
   name: string
   hex: string
   images: string[]
+  sizes?: ProductSize[]
 }
 
 export interface Product {

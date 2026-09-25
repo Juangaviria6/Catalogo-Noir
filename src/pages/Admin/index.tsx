@@ -113,7 +113,9 @@ const AdminPage = () => {
       sku: product.sku ?? '',
       brand: product.brand ?? '',
       images: [...product.images],
-      colors: product.colors ? product.colors.map(c => ({ ...c, images: [...c.images] })) : [],
+        colors: product.colors
+          ? product.colors.map(c => ({ ...c, images: [...c.images], sizes: [...(c.sizes ?? product.sizes)] }))
+          : [],
     })
     setError(null)
     setPanelOpen(true)
@@ -132,8 +134,26 @@ const AdminPage = () => {
     }))
   }
 
+  const toggleColorSize = (index: number, size: ProductSize) => {
+    setForm(f => {
+      const colors = f.colors.map((color, colorIndex) => {
+        if (colorIndex !== index) return color
+        const sizes = color.sizes ?? f.sizes
+        return {
+          ...color,
+          sizes: sizes.includes(size) ? sizes.filter(item => item !== size) : [...sizes, size],
+        }
+      })
+      const sizes = [...new Set(colors.flatMap(color => color.sizes ?? f.sizes))]
+      return { ...f, colors, sizes }
+    })
+  }
+
   const addColor = () => {
-    setForm(f => ({ ...f, colors: [...f.colors, { name: '', hex: '#1a1a1a', images: [] }] }))
+    setForm(f => ({
+      ...f,
+      colors: [...f.colors, { name: '', hex: '#1a1a1a', images: [], sizes: [...f.sizes] }],
+    }))
   }
 
   const updateColor = (index: number, patch: Partial<ProductColor>) => {
@@ -144,13 +164,23 @@ const AdminPage = () => {
   }
 
   const removeColor = (index: number) => {
-    setForm(f => ({ ...f, colors: f.colors.filter((_, i) => i !== index) }))
+    setForm(f => {
+      const removed = f.colors[index]
+      const colors = f.colors.filter((_, i) => i !== index)
+      const sizes = colors.length > 0
+        ? [...new Set(colors.flatMap(color => color.sizes ?? f.sizes))]
+        : [...(removed.sizes ?? f.sizes)]
+      return { ...f, colors, sizes }
+    })
   }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (form.images.length === 0) { setError('Sube al menos una imagen.'); return }
     if (form.sizes.length === 0) { setError('Selecciona al menos una talla.'); return }
+    if (form.colors.some(color => color.name.trim() && (color.sizes ?? []).length === 0)) {
+      setError('Cada color debe tener al menos una talla disponible.'); return
+    }
     if (getBrandsForCategory(form.category).length > 0 && !form.brand) {
       setError('Selecciona una marca.'); return
     }
@@ -158,20 +188,26 @@ const AdminPage = () => {
     setSaving(true)
     setError(null)
 
+    const colors = form.colors.filter(color => color.name.trim())
     const payload = {
       name: form.name.trim(),
       price: Number(form.price),
       category: form.category,
       description: form.description.trim(),
-      sizes: form.sizes,
+      sizes: colors.length > 0
+        ? [...new Set(colors.flatMap(color => color.sizes ?? form.sizes))]
+        : form.sizes,
       featured: form.featured,
       badge: form.badge.trim() || undefined,
       sku: form.sku.trim() || undefined,
       brand: form.brand.trim() || undefined,
       images: form.images,
-      colors: form.colors
-        .filter(c => c.name.trim())
-        .map(c => ({ name: c.name.trim(), hex: c.hex, images: c.images })),
+      colors: colors.map(color => ({
+        name: color.name.trim(),
+        hex: color.hex,
+        images: color.images,
+        sizes: color.sizes ?? form.sizes,
+      })),
     }
 
     try {
@@ -537,7 +573,7 @@ const AdminPage = () => {
 
                 {/* Imágenes */}
                 <div>
-                  <label className="block font-heading text-[10px] tracking-widest text-white/40 uppercase mb-3">
+                  <label className="block font-heading text-[10px] tracking-widest text-white/70 uppercase mb-3">
                     Imágenes del producto *
                   </label>
                   <CloudinaryUpload
@@ -550,7 +586,7 @@ const AdminPage = () => {
 
                 {/* Nombre */}
                 <div>
-                  <label className="block font-heading text-[10px] tracking-widest text-white/40 uppercase mb-2">
+                  <label className="block font-heading text-[10px] tracking-widest text-white/70 uppercase mb-2">
                     Nombre *
                   </label>
                   <input
@@ -558,14 +594,14 @@ const AdminPage = () => {
                     value={form.name}
                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                     placeholder="Ej: Noir Classic Cap"
-                    className="w-full bg-noir-mid border border-white/10 text-white placeholder-white/15 px-3 py-2.5 text-sm font-body focus:outline-none focus:border-white/30 transition-colors"
+                    className="w-full bg-noir-mid border border-white/10 text-white placeholder-white/35 px-3 py-2.5 text-sm font-body focus:outline-none focus:border-white/30 transition-colors"
                   />
                 </div>
 
                 {/* Precio + Categoría */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-heading text-[10px] tracking-widest text-white/40 uppercase mb-2">
+                    <label className="block font-heading text-[10px] tracking-widest text-white/70 uppercase mb-2">
                       Precio (COP) *
                     </label>
                     <input
@@ -576,11 +612,11 @@ const AdminPage = () => {
                       value={form.price}
                       onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
                       placeholder="89000"
-                      className="w-full bg-noir-mid border border-white/10 text-white placeholder-white/15 px-3 py-2.5 text-sm font-body focus:outline-none focus:border-white/30 transition-colors"
+                      className="w-full bg-noir-mid border border-white/10 text-white placeholder-white/35 px-3 py-2.5 text-sm font-body focus:outline-none focus:border-white/30 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block font-heading text-[10px] tracking-widest text-white/40 uppercase mb-2">
+                    <label className="block font-heading text-[10px] tracking-widest text-white/70 uppercase mb-2">
                       Categoría *
                     </label>
                     <select
@@ -606,7 +642,7 @@ const AdminPage = () => {
                 {/* Marca */}
                 {getBrandsForCategory(form.category).length > 0 && (
                   <div>
-                    <label className="block font-heading text-[10px] tracking-widest text-white/40 uppercase mb-2">
+                    <label className="block font-heading text-[10px] tracking-widest text-white/70 uppercase mb-2">
                       Marca *
                     </label>
                     <select
@@ -625,7 +661,7 @@ const AdminPage = () => {
 
                 {/* Descripción */}
                 <div>
-                  <label className="block font-heading text-[10px] tracking-widest text-white/40 uppercase mb-2">
+                  <label className="block font-heading text-[10px] tracking-widest text-white/70 uppercase mb-2">
                     Descripción *
                   </label>
                   <textarea
@@ -634,13 +670,13 @@ const AdminPage = () => {
                     value={form.description}
                     onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                     placeholder="Describe el producto..."
-                    className="w-full bg-noir-mid border border-white/10 text-white placeholder-white/15 px-3 py-2.5 text-sm font-body focus:outline-none focus:border-white/30 transition-colors resize-none"
+                    className="w-full bg-noir-mid border border-white/10 text-white placeholder-white/35 px-3 py-2.5 text-sm font-body focus:outline-none focus:border-white/30 transition-colors resize-none"
                   />
                 </div>
 
                 {/* Tallas */}
-                <div>
-                  <label className="block font-heading text-[10px] tracking-widest text-white/40 uppercase mb-2">
+                {form.colors.length === 0 && <div>
+                  <label className="block font-heading text-[10px] tracking-widest text-white/70 uppercase mb-2">
                     Tallas disponibles *
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -653,21 +689,21 @@ const AdminPage = () => {
                           'font-heading text-[10px] font-semibold tracking-wide px-3 py-1.5 border transition-all',
                           form.sizes.includes(size)
                             ? 'bg-white text-black border-white'
-                            : 'text-white/40 border-white/10 hover:border-white/30 hover:text-white',
+                            : 'text-white/60 border-white/10 hover:border-white/30 hover:text-white',
                         ].join(' ')}
                       >
                         {size}
                       </button>
                     ))}
                   </div>
-                </div>
+                </div>}
 
                 {/* Colores */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block font-heading text-[10px] tracking-widest text-white/40 uppercase">
+                    <label className="block font-heading text-[10px] tracking-widest text-white/70 uppercase">
                       Colores
-                      <span className="ml-1 text-white/20 normal-case tracking-normal">(opcional, tú los defines)</span>
+                      <span className="ml-1 text-white/45 normal-case tracking-normal">(opcional, tú los defines)</span>
                     </label>
                     <button
                       type="button"
@@ -680,7 +716,7 @@ const AdminPage = () => {
                   </div>
 
                   {form.colors.length === 0 ? (
-                    <p className="font-body text-xs text-white/20">
+                    <p className="font-body text-xs text-white/45">
                       Sin variantes de color — el producto usará las imágenes generales de arriba.
                     </p>
                   ) : (
@@ -699,7 +735,7 @@ const AdminPage = () => {
                               value={color.name}
                               onChange={e => updateColor(i, { name: e.target.value })}
                               placeholder="Nombre del color (ej: Azul petróleo)"
-                              className="flex-1 bg-noir-mid border border-white/10 text-white placeholder-white/15 px-3 py-2 text-xs font-body focus:outline-none focus:border-white/30 transition-colors"
+                              className="flex-1 bg-noir-mid border border-white/10 text-white placeholder-white/35 px-3 py-2 text-xs font-body focus:outline-none focus:border-white/30 transition-colors"
                             />
                             <button
                               type="button"
@@ -712,7 +748,30 @@ const AdminPage = () => {
                           </div>
 
                           <div>
-                            <p className="font-heading text-[9px] tracking-widest text-white/30 uppercase mb-2">
+                            <p className="font-heading text-[9px] tracking-widest text-white/55 uppercase mb-2">
+                              Tallas disponibles para {color.name.trim() || 'este color'}
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {getSizesForCategory(form.category).map(size => (
+                                <button
+                                  type="button"
+                                  key={size}
+                                  onClick={() => toggleColorSize(i, size)}
+                                  className={[
+                                    'font-heading text-[10px] font-semibold tracking-wide px-3 py-1.5 border transition-all',
+                                    (color.sizes ?? form.sizes).includes(size)
+                                      ? 'bg-white text-black border-white'
+                                      : 'text-white/60 border-white/10 hover:border-white/30 hover:text-white',
+                                  ].join(' ')}
+                                >
+                                  {size}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className="font-heading text-[9px] tracking-widest text-white/55 uppercase mb-2">
                               Imágenes para este color
                             </p>
                             <CloudinaryUpload
@@ -731,27 +790,27 @@ const AdminPage = () => {
                 {/* Badge + SKU */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-heading text-[10px] tracking-widest text-white/40 uppercase mb-2">
+                    <label className="block font-heading text-[10px] tracking-widest text-white/70 uppercase mb-2">
                       Badge
-                      <span className="ml-1 text-white/20 normal-case tracking-normal">(opcional)</span>
+                      <span className="ml-1 text-white/45 normal-case tracking-normal">(opcional)</span>
                     </label>
                     <input
                       value={form.badge}
                       onChange={e => setForm(f => ({ ...f, badge: e.target.value }))}
                       placeholder="Nuevo, Bestseller..."
-                      className="w-full bg-noir-mid border border-white/10 text-white placeholder-white/15 px-3 py-2.5 text-sm font-body focus:outline-none focus:border-white/30 transition-colors"
+                      className="w-full bg-noir-mid border border-white/10 text-white placeholder-white/35 px-3 py-2.5 text-sm font-body focus:outline-none focus:border-white/30 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block font-heading text-[10px] tracking-widest text-white/40 uppercase mb-2">
+                    <label className="block font-heading text-[10px] tracking-widest text-white/70 uppercase mb-2">
                       SKU
-                      <span className="ml-1 text-white/20 normal-case tracking-normal">(opcional)</span>
+                      <span className="ml-1 text-white/45 normal-case tracking-normal">(opcional)</span>
                     </label>
                     <input
                       value={form.sku}
                       onChange={e => setForm(f => ({ ...f, sku: e.target.value }))}
                       placeholder="NR-001"
-                      className="w-full bg-noir-mid border border-white/10 text-white placeholder-white/15 px-3 py-2.5 text-sm font-body focus:outline-none focus:border-white/30 transition-colors"
+                      className="w-full bg-noir-mid border border-white/10 text-white placeholder-white/35 px-3 py-2.5 text-sm font-body focus:outline-none focus:border-white/30 transition-colors"
                     />
                   </div>
                 </div>
@@ -771,8 +830,8 @@ const AdminPage = () => {
                     ].join(' ')} />
                   </div>
                   <div>
-                    <p className="font-heading text-[10px] tracking-widest text-white/40 uppercase">Producto destacado</p>
-                    <p className="font-body text-[10px] text-white/20 mt-0.5">Aparece en la sección "Más vendidos" del Home</p>
+                    <p className="font-heading text-[10px] tracking-widest text-white/70 uppercase">Producto destacado</p>
+                    <p className="font-body text-[10px] text-white/45 mt-0.5">Aparece en la sección "Más vendidos" del Home</p>
                   </div>
                 </label>
 

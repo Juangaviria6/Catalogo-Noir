@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Pencil, Trash2, X, Star, Package, Layers, Check, Image as ImageIcon } from 'lucide-react'
+import { Plus, Pencil, Trash2, X, Star, Package, Layers, Check, Image as ImageIcon, LockKeyhole } from 'lucide-react'
 import { productsService } from '@/services/products'
 import { categoriesService } from '@/services/categories'
 import { useCategories } from '@/hooks/useCategories'
@@ -47,8 +47,72 @@ const CATEGORIES: { value: ProductCategory; label: string }[] = [
   { value: 'jeans', label: 'Jeans' },
 ]
 
-// ── Admin Page ─────────────────────────────────────────────────────────────
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD
+
 const AdminPage = () => {
+  const [unlocked, setUnlocked] = useState(false)
+  const [password, setPassword] = useState('')
+  const [invalidPassword, setInvalidPassword] = useState(false)
+
+  const handleUnlock = (event: FormEvent) => {
+    event.preventDefault()
+    if (ADMIN_PASSWORD && password === ADMIN_PASSWORD) {
+      setUnlocked(true)
+      setInvalidPassword(false)
+      return
+    }
+    setPassword('')
+    setInvalidPassword(true)
+  }
+
+  if (!unlocked) {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center px-4">
+        <form onSubmit={handleUnlock} className="w-full max-w-sm border border-white/10 bg-noir-dark p-7 sm:p-9">
+          <div className="mb-7 flex items-center gap-3">
+            <LockKeyhole size={18} className="text-white/60" />
+            <div>
+              <p className="font-heading text-[10px] tracking-[0.25em] text-white/40 uppercase">Noir Store</p>
+              <h1 className="font-heading text-lg font-bold uppercase">Acceso administrador</h1>
+            </div>
+          </div>
+          <label htmlFor="admin-password" className="mb-2 block font-heading text-[10px] tracking-widest text-white/60 uppercase">
+            Clave de acceso
+          </label>
+          <input
+            id="admin-password"
+            type="password"
+            autoComplete="current-password"
+            autoFocus
+            required
+            disabled={!ADMIN_PASSWORD}
+            value={password}
+            onChange={event => {
+              setPassword(event.target.value)
+              setInvalidPassword(false)
+            }}
+            className="mb-3 w-full border border-white/15 bg-black px-3 py-3 text-sm text-white outline-none transition-colors focus:border-white/50 disabled:opacity-40"
+          />
+          {!ADMIN_PASSWORD && (
+            <p role="alert" className="mb-3 font-body text-xs text-red-400">
+              Falta configurar VITE_ADMIN_PASSWORD en el archivo .env.
+            </p>
+          )}
+          {invalidPassword && (
+            <p role="alert" className="mb-3 font-body text-xs text-red-400">La clave ingresada no es correcta.</p>
+          )}
+          <Button type="submit" fullWidth disabled={!ADMIN_PASSWORD}>
+            Ingresar
+          </Button>
+        </form>
+      </main>
+    )
+  }
+
+  return <AdminDashboard />
+}
+
+const AdminDashboard = () => {
   const [adminTab, setAdminTab] = useState<'products' | 'categories'>('products')
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
